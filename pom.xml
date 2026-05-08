@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TicketCharge Hub - Maven POM
+  Jenkins CI/CD pipeline ke liye yeh file use hoti hai.
+  Yeh project Node.js/React hai, Maven sirf pipeline orchestration ke liye hai.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ================================================ -->
+    <!-- Project Info -->
+    <!-- ================================================ -->
+    <groupId>com.ticketcharge</groupId>
+    <artifactId>ticketcharge-hub</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>TicketCharge Hub</name>
+    <description>
+        Event Management Platform - React + Node.js + MongoDB
+        CI/CD pipeline via Jenkins and Docker
+    </description>
+
+    <!-- ================================================ -->
+    <!-- Properties -->
+    <!-- ================================================ -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <node.version>v20.0.0</node.version>
+        <npm.version>10.0.0</npm.version>
+        <docker.image.frontend>ticketcharge-frontend</docker.image.frontend>
+        <docker.image.backend>ticketcharge-backend</docker.image.backend>
+        <docker.tag>${project.version}</docker.tag>
+    </properties>
+
+    <!-- ================================================ -->
+    <!-- Build -->
+    <!-- ================================================ -->
+    <build>
+        <plugins>
+
+            <!-- ---- Frontend Build (npm) ---- -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.15.0</version>
+
+                <configuration>
+                    <nodeVersion>${node.version}</nodeVersion>
+                    <npmVersion>${npm.version}</npmVersion>
+                    <workingDirectory>${project.basedir}</workingDirectory>
+                </configuration>
+
+                <executions>
+
+                    <!-- Install Node + npm -->
+                    <execution>
+                        <id>install-node-and-npm</id>
+                        <goals>
+                            <goal>install-node-and-npm</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+
+                    <!-- npm install (frontend) -->
+                    <execution>
+                        <id>npm-install-frontend</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <arguments>install --legacy-peer-deps</arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- npm run build (frontend) -->
+                    <execution>
+                        <id>npm-build-frontend</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>compile</phase>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- npm install (backend) -->
+                    <execution>
+                        <id>npm-install-backend</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <workingDirectory>${project.basedir}/backend</workingDirectory>
+                            <arguments>install --omit=dev</arguments>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+            <!-- ---- Docker Build via exec-maven-plugin ---- -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+
+                <executions>
+
+                    <!-- Build Frontend Docker Image -->
+                    <execution>
+                        <id>docker-build-frontend</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.image.frontend}:${docker.tag}</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.image.frontend}:latest</argument>
+                                <argument>-f</argument>
+                                <argument>Dockerfile</argument>
+                                <argument>.</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                    <!-- Build Backend Docker Image -->
+                    <execution>
+                        <id>docker-build-backend</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>docker</executable>
+                            <arguments>
+                                <argument>build</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.image.backend}:${docker.tag}</argument>
+                                <argument>-t</argument>
+                                <argument>${docker.image.backend}:latest</argument>
+                                <argument>-f</argument>
+                                <argument>backend/Dockerfile</argument>
+                                <argument>backend</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

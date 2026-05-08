@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" fill="none">
+  <defs>
+    <!-- Gradient for the infinity symbol -->
+    <linearGradient id="infinityGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#a855f7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Left circle of infinity -->
+  <circle cx="200" cy="200" r="80" fill="none" stroke="url(#infinityGrad)" stroke-width="20"/>
+  
+  <!-- Right part of infinity -->
+  <path d="M 280 200 Q 350 120, 450 200 Q 550 280, 600 200 Q 550 120, 450 200 Q 350 280, 280 200" 
+        fill="none" 
+        stroke="url(#infinityGrad)" 
+        stroke-width="20"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+  
+  <!-- Large T in the center -->
+  <text x="280" y="260" font-family="Arial, sans-serif" font-size="180" font-weight="bold" fill="white">T</text>
+  
+  <!-- GET text -->
+  <text x="140" y="190" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" letter-spacing="4">GET</text>
+  
+  <!-- OGETHER text -->
+  <text x="520" y="240" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ec4899" letter-spacing="2">OGETHER</text>
+</svg>

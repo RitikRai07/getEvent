@@ -4,8 +4,6 @@
 # Services: jenkins | mongodb | backend | frontend
 # ==========================================================
 
-version: '3.8'
-
 services:
 
   # --------------------------------------------------------
@@ -13,11 +11,11 @@ services:
   # --------------------------------------------------------
   jenkins:
     image: jenkins/jenkins:lts
-    container_name: ticketcharge-jenkins
+    container_name: jenkins-server
     restart: unless-stopped
     user: root
     ports:
-      - "8080:8080"       # Jenkins Web UI
+      - "8090:8080"       # Jenkins Web UI
       - "50000:50000"     # Jenkins Agent port
     volumes:
       - jenkins_home:/var/jenkins_home
@@ -26,25 +24,25 @@ services:
     environment:
       JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
     networks:
-      - ticketcharge-net
+      - jenkins-net
 
   # --------------------------------------------------------
   # MongoDB
   # --------------------------------------------------------
   mongodb:
     image: mongo:7.0
-    container_name: ticketcharge-mongodb
+    container_name: jenkins-mongodb
     restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-admin123}
       MONGO_INITDB_DATABASE: ticketcharge_hub
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongodb_data:/data/db
     networks:
-      - ticketcharge-net
+      - jenkins-net
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 30s
@@ -56,8 +54,11 @@ services:
   # Backend - Node.js + Express
   # --------------------------------------------------------
   backend:
-    image: ticketcharge-backend:latest
-    container_name: ticketcharge-backend
+    build:
+      context: ../
+      dockerfile: backend/Dockerfile
+      target: production
+    container_name: jenkins-backend
     restart: unless-stopped
     environment:
       PORT: 5050
@@ -76,28 +77,31 @@ services:
       RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
       RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
     ports:
-      - "5050:5050"
+      - "5051:5050"
     depends_on:
       mongodb:
         condition: service_healthy
     volumes:
       - backend_uploads:/app/public/uploads
     networks:
-      - ticketcharge-net
+      - jenkins-net
 
   # --------------------------------------------------------
   # Frontend - React + Nginx
   # --------------------------------------------------------
   frontend:
-    image: ticketcharge-frontend:latest
-    container_name: ticketcharge-frontend
+    build:
+      context: ../
+      dockerfile: Dockerfile
+      target: production
+    container_name: jenkins-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8081:80"
     depends_on:
       - backend
     networks:
-      - ticketcharge-net
+      - jenkins-net
 
 # --------------------------------------------------------
 # Volumes
@@ -114,5 +118,5 @@ volumes:
 # Network
 # --------------------------------------------------------
 networks:
-  ticketcharge-net:
+  jenkins-net:
     driver: bridge
